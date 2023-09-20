@@ -3,6 +3,8 @@ import { App } from "./app"
 import { Bike } from "./bike"
 import { User } from "./user"
 import { Location } from "./location"
+import { BikeNotFoundError } from "./errors/bike-not-found-error"
+import { UserNotFoundError } from "./errors/user-not-found"
 
 describe('App', () => {
     it('should correctly calculate the rent amount', async () => {
@@ -33,11 +35,32 @@ describe('App', () => {
 
     it('should throw an exception when trying to move an unregistered bike', () => {
         const app = new App()
+        const newYork = new Location(40.753056, -73.983056)
+        expect(() => {
+            app.moveBikeTo('fake-id', newYork)
+
+        }).toThrow(BikeNotFoundError)
+    })
+
+    it('should correctly handle bike rent',async () => {
+        const app = new App()
+        const user = new User('Jose', 'jose@mail.com', '1234')
+        await app.registerUser(user)
         const bike = new Bike('caloi mountainbike', 'mountain bike',
             1234, 1234, 100.0, 'My bike', 5, [])
-        const location = new Location(40.753056, -73.983056)
-        expect(() => {
-            app.moveBikeTo(bike.id, location)
-        }).toThrow()
+        app.registerBike(bike)
+        app.rentBike(bike.id, user.email)
+        expect(app.rents.length).toEqual(1)
+        expect(app.rents[0].bike.id).toEqual(bike.id)
+        expect(app.rents[0].user.id).toEqual(user.id)
+    })
+
+    it('should throw an exception when trying to remove an unregistered user', async () =>{
+        const app = new App()
+        const user = new User('Jose', 'jose@mail.com', '1234')
+        await app.registerUser(user)
+        expect (() => {
+            app.removeUser('joao@mail.com')
+        }).toThrow(UserNotFoundError)
     })
 })
