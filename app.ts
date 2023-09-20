@@ -93,6 +93,16 @@ export class App {
     listRents(): Rent[] {
         return this.rents
     }
+    moveBikeTo(bikeId: string | undefined, location: Location): void{
+        const bike = this.bikes.find(bike => bike.id === bikeId)
+        if(bike){
+            bike.position.latitude = location.latitude
+            bike.position.longitude = location.longitude
+        }
+        else{
+            throw new Error('Bike not found.')
+        }
+    }
 }
 
 function diffHours(dt2: Date, dt1: Date) {
@@ -100,16 +110,4 @@ function diffHours(dt2: Date, dt1: Date) {
   diff /= (60 * 60);
   return Math.abs(diff);
 }
-getCurrentLocation(Bikelat: number, Bikelong: number): number{
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(position => {
-            Bikelat = position.coords.latitude;
-            BikeLong = position.coords.longitude;
-            return position
-        });
-    
-    else{
-        throw new Error("Bike not found.")
-    }
-    }
-}
+
