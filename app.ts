@@ -38,6 +38,7 @@ export class App {
 
     async authenticate(userEmail: string, password: string): Promise<boolean> {
         const user = this.findUser(userEmail)
+        if (!user) throw new Error('User not found.')
         return await this.crypt.compare(password, user.password)
     }
 
