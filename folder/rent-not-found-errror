@@ -1,0 +1,7 @@
+export class RentNotFoundErrorError extends Error {
+    public readonly name = 'RentNotFoundError'
+
+    constructor() {
+        super('Rent not found.')
+    }
+}
