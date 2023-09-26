@@ -3,7 +3,7 @@ import { App } from "./app"
 import { Bike } from "./bike"
 import { User } from "./user"
 import { Location } from "./location"
-import { BikeNotFoundError } from "./errors/bike-not-found-error"
+import { BikeNotFoundError } from "./errors/bike-not-found"
 import { UserNotFoundError } from "./errors/user-not-found"
 
 describe('App', () => {
@@ -63,4 +63,47 @@ describe('App', () => {
             app.removeUser('joao@mail.com')
         }).toThrow(UserNotFoundError)
     })
+    it('should throw an exception when trying to return an unregistered bike', async()=>{
+        const app = new App()
+        const user = new User('Jose', 'jose@mail.com', '1234')
+        await app.registerUser(user)
+        const bike = new Bike('caloi mountainbike', 'mountain bike',
+            1234, 1234, 100.0, 'My bike', 5, [])
+            app.registerBike(bike)
+        const bike2 = new Bike('caloi speed', 'speed bike',
+            3234, 3234, 1200.0, 'bike', 5, [])
+        expect(()=>{
+            app.returnBike(bike2.id, 'joao@mail.com')
+        }).toThrow(RentNotFoundError)
+    })
+    it('should throw an exception when the passwords do not match.', async()=>{
+        const app = new App()
+        const user = new User('Jose', 'jose@mail.com', '1234')
+        await app.registerUser(user)
+        expect(()=>(
+            app.authenticate('joao@mail', '2134')
+        )).toThrow(UserNotFoundError)
+        
+
+    })
+    it('should throw an exception when trying to rent an unavailable bike.', async()=>{
+        const app = new App()
+        const user = new User('Jose', 'jose@mail.com', '1234')
+        const user2 = new User('Joao', 'joao@mail.com', '1334')
+        await app.registerUser(user)
+        const bike = new Bike('caloi mountainbike', 'mountain bike',
+            1234, 1234, 100.0, 'My bike', 5, [])
+        app.rentBike(bike.id, user.email)
+        expect(()=>{
+            app.rentBike(bike.id, user2.email)
+        }).toThrow(UnavailableBikeError)
+
+    it('should throw an exception when trying to find an unregistered bike', () => {
+        const app = new App()          
+        expect(() => {
+            app.findBike('fake-id')
+    
+        }).toThrow(BikeNotFoundError)
+    })
+
 })
